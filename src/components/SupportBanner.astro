@@ -1,0 +1,63 @@
+---
+// Всплывающий баннер «Поддержать». Появляется, когда на экран попадает элемент с [data-support-trigger].
+interface Props {
+  title: string;
+  text?: string;
+  buttonLabel: string;
+  href: string;
+}
+const { title, text, buttonLabel, href } = Astro.props;
+---
+
+<aside
+  id="support-banner"
+  aria-label="Поддержать"
+  class="bg-accent fixed inset-x-3 top-3 z-40 -translate-y-6 rounded-xl p-5 pr-12 text-white opacity-0 shadow-2xl transition duration-500 sm:inset-x-auto sm:right-6 sm:top-6 sm:w-[340px] [&:not(.is-visible)]:pointer-events-none [&.is-visible]:translate-y-0 [&.is-visible]:opacity-100"
+  hidden
+>
+  <button
+    type="button"
+    data-support-close
+    aria-label="Закрыть"
+    class="absolute top-2 right-2 flex size-9 cursor-pointer items-center justify-center rounded-full text-2xl leading-none text-white/80 hover:bg-white/15 hover:text-white"
+  >
+    ×
+  </button>
+  <p class="text-[20px] leading-tight font-bold text-balance">{title}</p>
+  {text && <p class="mt-2 text-[15px] leading-snug text-white/90">{text}</p>}
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener"
+    class="mt-4 inline-flex h-11 items-center rounded-md bg-white px-6 text-[15px] font-semibold text-black transition hover:bg-neutral-100"
+  >
+    {buttonLabel}
+  </a>
+</aside>
+
+<script>
+  const banner = document.getElementById('support-banner');
+  const trigger = document.querySelector('[data-support-trigger]');
+
+  if (banner && trigger) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Показываем, когда блок доскроллили или уже проскроллили
+        if (entries.some((e) => e.isIntersecting || e.boundingClientRect.top < 0)) {
+          banner.hidden = false;
+          requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('is-visible')));
+          observer.disconnect();
+        }
+      },
+      // Срабатывает, когда метка поднимается в верхние 60% экрана
+      { rootMargin: '0px 0px -40% 0px' },
+    );
+    observer.observe(trigger);
+
+    // Закрытие действует до перезагрузки страницы
+    banner.querySelector('[data-support-close]')?.addEventListener('click', () => {
+      banner.classList.remove('is-visible');
+      setTimeout(() => (banner.hidden = true), 500);
+    });
+  }
+</script>

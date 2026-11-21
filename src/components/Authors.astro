@@ -1,0 +1,23 @@
+---
+interface Props {
+  title?: string;
+  items: { name: string; role: string }[];
+  /** Показ баннера «Поддержать» начинается с этого блока */
+  trigger?: boolean;
+}
+const { title = 'Авторы', items, trigger = false } = Astro.props;
+const id = `credits-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<section class="not-prose my-8 font-sans" aria-labelledby={id} data-support-trigger={trigger || undefined}>
+  <p id={id} class="mb-2 text-[13px] font-semibold tracking-wider text-neutral-500 uppercase">{title}</p>
+  <ul class="space-y-1 text-[16px] leading-snug text-[#333]">
+    {
+      items.map((a) => (
+        <li>
+          <span class="font-semibold text-black">{a.name}</span> — {a.role}
+        </li>
+      ))
+    }
+  </ul>
+</section>

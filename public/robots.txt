@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tedtedtedkeen.github.io/hospice-stories/sitemap-index.xml

@@ -1,0 +1,120 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PhotoRow from '../components/PhotoRow.astro';
+import SupportBanner from '../components/SupportBanner.astro';
+import { siInstagram, siTelegram, siFacebook, siYoutube, siTiktok } from 'simple-icons';
+
+// На лендинге одна статья — берём первую из коллекции
+const [entry] = await getCollection('article');
+if (!entry) throw new Error('Добавьте статью в src/content/article');
+
+const { Content } = await render(entry);
+const { title, description, date, authors, cover, coverCaption, credits } = entry.data;
+
+// Соцсети Первого детского хосписа (с hospice.kg/contacts)
+const hospiceSocials = [
+  { label: 'Instagram', icon: siInstagram.path, href: 'https://www.instagram.com/hospice_kg/' },
+  { label: 'Telegram', icon: siTelegram.path, href: 'https://t.me/hospice_kg' },
+  { label: 'Facebook', icon: siFacebook.path, href: 'https://www.facebook.com/FirstChildrenHospice' },
+  { label: 'YouTube', icon: siYoutube.path, href: 'https://www.youtube.com/channel/UCDzduAyhLU_sPc_tViMzi2A' },
+  { label: 'TikTok', icon: siTiktok.path, href: 'https://www.tiktok.com/@hospice_kg' },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={cover[0].src}
+  imageAlt={cover[0].alt}
+  type="article"
+  publishedTime={date}
+  author={authors.join(', ') || undefined}
+>
+  <main class="mx-auto max-w-[712px] px-4 pt-10 pb-16 md:pt-16">
+    <h1 class="mb-8 text-[28px] leading-[1.12] font-bold text-balance md:mb-10 md:text-[40px] md:leading-[1.1]">
+      {title}
+    </h1>
+
+    {
+      cover.length === 1 ? (
+        <figure class="pswp-gallery">
+          <Picture
+            src={cover[0].src}
+            alt={cover[0].alt}
+            formats={['avif', 'webp']}
+            widths={[400, 680, 1360]}
+            sizes="(min-width: 720px) 680px, 100vw"
+            loading="eager"
+            fetchpriority="high"
+            class="h-auto w-full"
+          />
+          {coverCaption && <figcaption class="text-muted mt-3 text-[15px] leading-snug">{coverCaption}</figcaption>}
+        </figure>
+      ) : (
+        <PhotoRow images={cover} caption={coverCaption} eager />
+      )
+    }
+
+    <article class="story prose mt-8">
+      <Content />
+    </article>
+
+    {
+      credits.length > 0 && (
+        <div class="mt-12 font-serif text-[17px] leading-relaxed text-[#333] italic">
+          {credits.map((line) => (
+            <p>{line}</p>
+          ))}
+        </div>
+      )
+    }
+
+    <section aria-labelledby="hospice-social" class="mt-14 rounded-xl bg-[#e8effc] px-6 py-8 md:px-10 md:py-10">
+      <h2 id="hospice-social" class="text-[22px] leading-tight font-bold text-balance md:text-[28px]">
+        Хоспис в социальных сетях
+      </h2>
+      <ul class="mt-6 flex flex-wrap gap-2">
+        {
+          hospiceSocials.map((s) => (
+            <li>
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex h-11 items-center gap-2 rounded-md border border-black px-4 text-[15px] font-semibold text-black transition hover:bg-black hover:text-white"
+              >
+                <svg viewBox="0 0 24 24" class="size-[18px] shrink-0 fill-current" aria-hidden="true">
+                  <path d={s.icon} />
+                </svg>
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <aside aria-label="Поддержать хоспис" class="bg-accent mt-4 rounded-xl px-6 py-8 text-white md:px-10 md:py-10">
+      <p class="text-[22px] leading-tight font-bold text-balance md:text-[28px]">
+        В Первом хосписе семьи обретают поддержку — благодаря неравнодушию других людей. Стать частью поддержки — легко
+      </p>
+      <a
+        href="https://hospice.kg/"
+        target="_blank"
+        rel="noopener"
+        class="mt-6 inline-flex h-12 items-center rounded-md bg-white px-7 text-[16px] font-semibold text-black transition hover:bg-neutral-100"
+      >
+        Хочу поддержать
+      </a>
+    </aside>
+  </main>
+
+  <SupportBanner
+    title="Первый детский хоспис помогает семьям совершенно бесплатно. Поддержите его работу, если хотите"
+    buttonLabel="Хочу поддержать"
+    href="https://hospice.kg/"
+  />
+
+</BaseLayout>

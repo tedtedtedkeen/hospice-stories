@@ -1,0 +1,45 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Picture, getImage } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  credit?: string;
+}
+
+const { src, alt, caption, credit } = Astro.props;
+const isPortrait = src.height > src.width;
+const full = await getImage({ src, width: Math.min(src.width, 2400), format: 'webp' });
+const fullW = Number(full.attributes.width ?? src.width);
+const fullH = Math.round((fullW / src.width) * src.height);
+---
+
+<figure class="not-prose pswp-gallery my-8 md:my-10">
+  <a
+    href={full.src}
+    data-pswp-width={fullW}
+    data-pswp-height={fullH}
+    target="_blank"
+    class:list={['block bg-neutral-100', isPortrait && 'mx-auto sm:max-w-[460px]']}
+  >
+    <Picture
+      src={src}
+      alt={alt}
+      formats={['avif', 'webp']}
+      widths={[400, 680, 920, 1360]}
+      sizes={isPortrait ? '(min-width: 640px) 460px, 100vw' : '(min-width: 720px) 680px, 100vw'}
+      class="h-auto w-full"
+    />
+  </a>
+  {
+    (caption || credit) && (
+      <figcaption class:list={['text-muted mt-3 font-sans text-[15px] leading-snug', isPortrait && 'mx-auto sm:max-w-[460px]']}>
+        {caption}
+        {caption && credit && ' '}
+        {credit && <span>Фото: {credit}</span>}
+      </figcaption>
+    )
+  }
+</figure>
